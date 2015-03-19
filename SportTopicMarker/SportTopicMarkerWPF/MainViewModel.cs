@@ -143,14 +143,9 @@ namespace SportTopicMarkerWPF
                     i++;
                 }
 
-                i = 1;
-                foreach (LabeledArticle article in articles)
-                {
-                    int i1 = i;
-                    Train.ReportProgress(() => TrainingStatus = string.Format("Teaching classifier {0}/{1}", i1, total));
-                    _marker.TrainClassifierWithArticle(article);
-                    i++;
-                }
+                Train.ReportProgress(() => TrainingStatus = "Teaching classifier ...");
+
+                double averageError = _marker.TrainClassifierWithArticles(_database.Articles);
 
                 Train.ReportProgress(() => TrainingStatus = "Saving...");
 
@@ -162,7 +157,7 @@ namespace SportTopicMarkerWPF
                 _database.Save(DataSetPath);
                 _marker.Save();
 
-                Train.ReportProgress(() => TrainingStatus = "Training completed");
+                Train.ReportProgress(() => TrainingStatus = "Training completed with average error on validation set " + averageError);
             }
         }
     }

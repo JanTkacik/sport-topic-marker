@@ -74,7 +74,7 @@ bayern,0,5,0,0,0
 wolfsburg,0,1,0,0,0
 tunis,1,0,0,0,0
 bardo,1,0,0,0,0
-continue,1,0,0,0,0
+continue,2,0,0,0,0
 tunisia,1,0,0,0,0
 japan,1,0,0,0,0
 colombia,1,0,0,0,0
@@ -121,7 +121,7 @@ passengers,1,0,0,0,0
 houthis,1,0,0,0,0
 virginia,1,0,1,0,0
 charlottesville,1,0,0,0,0
-us,1,0,0,0,0
+us,2,0,0,0,0
 state,1,0,0,0,1
 police,1,0,0,0,0
 uva,1,0,0,0,0
@@ -187,7 +187,7 @@ atlantic,0,0,0,1,0
 tampa,0,0,0,1,0
 bay,0,0,0,1,0
 lightning,0,0,0,1,0
-washington,0,0,0,2,0
+washington,1,0,0,2,0
 winnipeg,0,0,0,1,0
 jet,0,0,0,1,0
 york-new,0,0,0,1,0
@@ -245,3 +245,11 @@ islands,1,0,0,0,0
 russia,1,0,0,0,0
 kremlin,1,0,0,0,0
 qc,1,0,0,0,0
+somalia,1,0,0,0,0
+mogadishu,1,0,0,0,0
+somalium,1,0,0,0,0
+westgate,1,0,0,0,0
+mall,1,0,0,0,0
+nairobi,1,0,0,0,0
+dinsoor,1,0,0,0,0
+kenya,1,0,0,0,0

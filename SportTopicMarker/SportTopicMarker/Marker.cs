@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using AForge.Neuro;
 using AForge.Neuro.Learning;
@@ -120,6 +121,98 @@ namespace SportTopicMarker
             return error;
         }
 
+        public double TrainClassifierWithArticles(List<LabeledArticle> articles)
+        {
+            List<LabeledArticle> trainingSet = new List<LabeledArticle>();
+            List<LabeledArticle> validationSet = new List<LabeledArticle>();
+
+            Array values = Enum.GetValues(typeof (SportCategory));
+            foreach (SportCategory category in values)
+            {
+                List<LabeledArticle> articlesForCategory = articles.FindAll(article => article.Category == category);
+                int half = articlesForCategory.Count/2;
+                for (int i = 0; i < articlesForCategory.Count; i++)
+                {
+                    if (i < half)
+                    {
+                        validationSet.Add(articlesForCategory[i]);
+                    }
+                    else
+                    {
+                        trainingSet.Add(articlesForCategory[i]);
+                    }
+                }
+            }
+
+            List<Tuple<double[], double[]>> trainingSetConverted = new List<Tuple<double[], double[]>>();
+            List<Tuple<double[], double[]>> validationSetConverted = new List<Tuple<double[], double[]>>();
+
+            foreach (LabeledArticle labeledArticle in trainingSet)
+            {
+                trainingSetConverted.Add(new Tuple<double[], double[]>(GetRawFeatures(labeledArticle.Article), GetOutput(labeledArticle)));
+            }
+            foreach (LabeledArticle labeledArticle in validationSet)
+            {
+                validationSetConverted.Add(new Tuple<double[], double[]>(GetRawFeatures(labeledArticle.Article), GetOutput(labeledArticle)));
+            }
+
+            double lastAverageError = double.MaxValue;
+            while (true)
+            {
+                foreach (Tuple<double[], double[]> article in trainingSetConverted)
+                {
+                    TrainClassifierWithArticleFast(article.Item1, article.Item2);
+                }
+                double averageError = CalculateAverageErrorFast(validationSetConverted);
+                if (averageError > lastAverageError)
+                {
+                    break;
+                }
+                if ((lastAverageError - averageError) < 0.000001)
+                {
+                    break;
+                }
+                if (lastAverageError < 0.0001)
+                {
+                    break;
+                }
+                lastAverageError = averageError;
+            }
+
+            return lastAverageError;
+        }
+
+        private double CalculateAverageErrorFast(List<Tuple<double[], double[]>> validationSetConverted)
+        {
+            double errorSum = 0;
+            foreach (Tuple<double[], double[]> article in validationSetConverted)
+            {
+                errorSum += CalculateErrorFast(article);
+            }
+            return errorSum / validationSetConverted.Count;
+        }
+
+        private double CalculateErrorFast(Tuple<double[], double[]> article)
+        {
+            double[] output = _classifier.Compute(article.Item1);
+            double sum = output.Sum();
+            for (int i = 0; i < output.Length; i++)
+            {
+                output[i] /= sum;
+            }
+            double error = 0;
+            for (int i = 0; i < output.Length; i++)
+            {
+                error += Math.Abs(output[i] - article.Item2[i]);
+            }
+            return error;
+        }
+
+        private void TrainClassifierWithArticleFast(double[] input, double[] output)
+        {
+            _teacher.Run(input, output);
+        }
+
         private double[] GetOutput(LabeledArticle article)
         {
             double[] output = new double[_categoriesCount];
@@ -188,6 +281,34 @@ namespace SportTopicMarker
             int hiddenLayerCount = (10 * _categoriesCount) / 3;
             _classifier = new ActivationNetwork(new SigmoidFunction(), 4 * _categoriesCount, hiddenLayerCount, _categoriesCount);
             _teacher = new BackPropagationLearning(_classifier);
+        }
+
+        public double CalculateError(LabeledArticle article)
+        {
+            double[] input = GetRawFeatures(article.Article);
+            double[] output = _classifier.Compute(input);
+            double sum = output.Sum();
+            for (int i = 0; i < output.Length; i++)
+            {
+                output[i] /= sum;
+            }
+            double[] correct = GetOutput(article);
+            double error = 0;
+            for (int i = 0; i < output.Length; i++)
+            {
+                error += Math.Abs(output[i] - correct[i]);
+            }
+            return error;
+        }
+
+        public double CalculateAverageError(List<LabeledArticle> articles)
+        {
+            double errorSum = 0;
+            foreach (LabeledArticle article in articles)
+            {
+                errorSum += CalculateError(article);
+            }
+            return errorSum / articles.Count;
         }
     }
 }
