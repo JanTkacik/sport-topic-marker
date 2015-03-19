@@ -21,7 +21,6 @@ namespace SportTopicMarker
             
             // Annotation pipeline configuration
             var props = new Properties();
-            //props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
             props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner");
             props.setProperty("sutime.rules", sutimeRules);
             props.setProperty("sutime.binders", "0");

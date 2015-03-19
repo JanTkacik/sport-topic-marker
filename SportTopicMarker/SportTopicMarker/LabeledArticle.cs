@@ -6,14 +6,19 @@ namespace SportTopicMarker
     public class LabeledArticle
     {
         public string Article { get; set; }
-        public bool IsAboutSport { get; set; }
         public SportCategory Category { get; set; }
+        public bool IsProcessed { get; set; }
 
-        public LabeledArticle(string article, bool isAboutSport, SportCategory category)
+        public string ArticleStub 
+        {
+            get { return Article.Substring(0, 100).Replace("\n", " "); }
+        }
+
+        public LabeledArticle(string article, SportCategory category)
         {
             Article = article;
-            IsAboutSport = isAboutSport;
             Category = category;
+            IsProcessed = false;
         }
 
         public LabeledArticle()
@@ -24,33 +29,10 @@ namespace SportTopicMarker
     [Serializable]
     public enum SportCategory
     {
-        NoSport, 
-        AmericanFootball, 
+        NoSport,  
         Football, 
-        Tennis, 
-        Golf, 
-        Biathlon, 
-        Athletics, 
-        Diving, 
-        Swimming, 
-        SynchronizedSwimming, 
-        WaterPolo, 
-        CanoeCayakSprint, 
-        CanoeCayakSvalom, 
-        Bmx, 
-        MountainBiking, 
-        RoadCycling, 
-        TrackCycling, 
+        Tennis,      
         IceHockey,
-        FigureSkating,
-        Softball,
-        Baseball,
-        Rugby,
-        Triathlon,
-        TableTennis,
-        Handball,
-        Basketball,
-        Bedminton,
-        Volleyball
+        Basketball
     }
 }

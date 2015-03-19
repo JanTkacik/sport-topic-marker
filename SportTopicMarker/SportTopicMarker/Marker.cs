@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using AForge.Neuro;
 using AForge.Neuro.Learning;
 using edu.stanford.nlp.pipeline;
@@ -10,10 +12,10 @@ namespace SportTopicMarker
     {
         private readonly NLPProcessor _processor;
         private readonly string _modelPath;
-        private readonly WordOccurenceDatabase _personOccurenceDatabase;
-        private readonly WordOccurenceDatabase _organizationOccurenceDatabase;
-        private readonly WordOccurenceDatabase _locationsOccurenceDatabase;
-        private readonly WordOccurenceDatabase _sportSpecificWordsOccurenceDatabase;
+        public WordOccurenceDatabase PersonOccurenceDatabase;
+        public WordOccurenceDatabase OrganizationOccurenceDatabase;
+        public WordOccurenceDatabase LocationsOccurenceDatabase;
+        public WordOccurenceDatabase SportSpecificWordsOccurenceDatabase;
         private readonly HashSet<string> _sportSpecificWords;
         private ActivationNetwork _classifier;
         private BackPropagationLearning _teacher;
@@ -25,11 +27,21 @@ namespace SportTopicMarker
         {
             _processor = processor;
             _modelPath = modelPath;
-            _sportSpecificWords = new HashSet<string>();
-            _personOccurenceDatabase = new WordOccurenceDatabase();
-            _organizationOccurenceDatabase = new WordOccurenceDatabase();
-            _locationsOccurenceDatabase = new WordOccurenceDatabase();
-            _sportSpecificWordsOccurenceDatabase = new WordOccurenceDatabase();
+
+            Annotation sportSpecificWords = _processor.Annotate(File.ReadAllText(modelPath + "specificwords.txt"));
+            _sportSpecificWords = NLPCoreHelper.GetLemmas(sportSpecificWords);
+            File.Delete(modelPath + "specificwords.txt");
+            StringBuilder builder = new StringBuilder();
+            foreach (string word in _sportSpecificWords)
+            {
+                builder.AppendLine(word);
+            }
+            File.WriteAllText(modelPath + "specificwords.txt", builder.ToString());
+
+            PersonOccurenceDatabase = new WordOccurenceDatabase();
+            OrganizationOccurenceDatabase = new WordOccurenceDatabase();
+            LocationsOccurenceDatabase = new WordOccurenceDatabase();
+            SportSpecificWordsOccurenceDatabase = new WordOccurenceDatabase();
             _categoriesCount = Enum.GetValues(typeof(SportCategory)).Length;
             int hiddenLayerCount = (10 * _categoriesCount) / 3;
             _classifier = new ActivationNetwork(new SigmoidFunction(), 4 * _categoriesCount, hiddenLayerCount, _categoriesCount);
@@ -51,7 +63,7 @@ namespace SportTopicMarker
             double[] input = GetRawFeatures(article);
             double[] output = _classifier.Compute(input);
             var maxIndex = GetMaxIndex(output);
-            return new LabeledArticle(article, maxIndex == 0, _indexCategory[maxIndex]);
+            return new LabeledArticle(article, _indexCategory[maxIndex]);
         }
 
         private static int GetMaxIndex(double[] output)
@@ -79,22 +91,22 @@ namespace SportTopicMarker
 
             foreach (string person in persons)
             {
-                _personOccurenceDatabase.AddWord(person, article.Category);
+                PersonOccurenceDatabase.AddWord(person, article.Category);
             }
 
             foreach (string organization in organizations)
             {
-                _organizationOccurenceDatabase.AddWord(organization, article.Category);
+                OrganizationOccurenceDatabase.AddWord(organization, article.Category);
             }
 
             foreach (string location in locations)
             {
-                _locationsOccurenceDatabase.AddWord(location, article.Category);
+                LocationsOccurenceDatabase.AddWord(location, article.Category);
             }
 
             foreach (string sportSpecificWord in sportSpecificWords)
             {
-                _sportSpecificWordsOccurenceDatabase.AddWord(sportSpecificWord, article.Category);
+                SportSpecificWordsOccurenceDatabase.AddWord(sportSpecificWord, article.Category);
             }
         }
 
@@ -103,17 +115,8 @@ namespace SportTopicMarker
             double[] input = GetRawFeatures(article.Article);
             double[] output = GetOutput(article);
 
-            SportCategory category;
-            double error;
-            int i = 0;
-            do
-            {
-                i++;
-                error = _teacher.Run(input, output);
-                double[] calculated = _classifier.Compute(input);
-                category = _indexCategory[GetMaxIndex(calculated)];
-            } while ((article.Category != category) && (i < 10));
-
+            double error = _teacher.Run(input, output);
+            Console.WriteLine(error);
             return error;
         }
 
@@ -132,10 +135,10 @@ namespace SportTopicMarker
             HashSet<string> locations = NLPCoreHelper.GetLocation(annotation);
             HashSet<string> sportSpecificWords = NLPCoreHelper.GetOccurence(annotation, _sportSpecificWords);
 
-            double[] personFeatures = _personOccurenceDatabase.GetFeatures(persons);
-            double[] organizationFeatures = _organizationOccurenceDatabase.GetFeatures(organizations);
-            double[] locationFeatures = _locationsOccurenceDatabase.GetFeatures(locations);
-            double[] specificFeatures = _sportSpecificWordsOccurenceDatabase.GetFeatures(sportSpecificWords);
+            double[] personFeatures = PersonOccurenceDatabase.GetFeatures(persons);
+            double[] organizationFeatures = OrganizationOccurenceDatabase.GetFeatures(organizations);
+            double[] locationFeatures = LocationsOccurenceDatabase.GetFeatures(locations);
+            double[] specificFeatures = SportSpecificWordsOccurenceDatabase.GetFeatures(sportSpecificWords);
 
             double[] features = new double[personFeatures.Length + organizationFeatures.Length + locationFeatures.Length + specificFeatures.Length];
             Array.Copy(personFeatures,0,features,0,personFeatures.Length);
@@ -153,24 +156,38 @@ namespace SportTopicMarker
 
         public void Save()
         {
-            _personOccurenceDatabase.Save(_modelPath + "persons.csv");
-            _organizationOccurenceDatabase.Save(_modelPath + "organizations.csv");
-            _locationsOccurenceDatabase.Save(_modelPath + "locations.csv");
-            _sportSpecificWordsOccurenceDatabase.Save(_modelPath + "specificwords.csv");
+            PersonOccurenceDatabase.Save(_modelPath + "persons.csv");
+            OrganizationOccurenceDatabase.Save(_modelPath + "organizations.csv");
+            LocationsOccurenceDatabase.Save(_modelPath + "locations.csv");
+            SportSpecificWordsOccurenceDatabase.Save(_modelPath + "specificwords.csv");
             _sportSpecificWords.Save(_modelPath + "specificwords.txt");
             _classifier.Save(_modelPath + "classifier");
         }
 
         public void Load()
         {
-            _personOccurenceDatabase.Load(_modelPath + "persons.csv");
-            _organizationOccurenceDatabase.Load(_modelPath + "organizations.csv");
-            _locationsOccurenceDatabase.Load(_modelPath + "locations.csv");
-            _sportSpecificWordsOccurenceDatabase.Load(_modelPath + "specificwords.csv");
+            PersonOccurenceDatabase.Load(_modelPath + "persons.csv");
+            OrganizationOccurenceDatabase.Load(_modelPath + "organizations.csv");
+            LocationsOccurenceDatabase.Load(_modelPath + "locations.csv");
+            SportSpecificWordsOccurenceDatabase.Load(_modelPath + "specificwords.csv");
             _sportSpecificWords.Load(_modelPath + "specificwords.txt");
-            ActivationNetwork network = (ActivationNetwork)Network.Load(_modelPath + "classifier");
-            _classifier = network;
-            _teacher = new BackPropagationLearning(network);
+            if (File.Exists(_modelPath + "classifier"))
+            {
+                ActivationNetwork network = (ActivationNetwork) Network.Load(_modelPath + "classifier");
+                _classifier = network;
+                _teacher = new BackPropagationLearning(network);
+            }
+        }
+
+        public void Reset()
+        {
+            PersonOccurenceDatabase = new WordOccurenceDatabase();
+            OrganizationOccurenceDatabase = new WordOccurenceDatabase();
+            LocationsOccurenceDatabase = new WordOccurenceDatabase();
+            SportSpecificWordsOccurenceDatabase = new WordOccurenceDatabase();
+            int hiddenLayerCount = (10 * _categoriesCount) / 3;
+            _classifier = new ActivationNetwork(new SigmoidFunction(), 4 * _categoriesCount, hiddenLayerCount, _categoriesCount);
+            _teacher = new BackPropagationLearning(_classifier);
         }
     }
 }

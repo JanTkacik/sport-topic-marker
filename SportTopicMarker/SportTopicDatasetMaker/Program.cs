@@ -76,11 +76,11 @@ namespace SportTopicDatasetMaker
                                 Console.WriteLine(name);
                             }
                         }
-                        database.Articles.Add(new LabeledArticle(article.ToString(), true, category));
+                        database.Articles.Add(new LabeledArticle(article.ToString(), category));
                     }
                     else
                     {
-                        database.Articles.Add(new LabeledArticle(article.ToString(), false, SportCategory.NoSport));
+                        database.Articles.Add(new LabeledArticle(article.ToString(), SportCategory.NoSport));
                     }
                 }
                 if (key.Key == ConsoleKey.Escape)

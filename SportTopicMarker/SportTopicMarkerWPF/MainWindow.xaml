@@ -1,0 +1,65 @@
+﻿<Window x:Class="SportTopicMarkerWPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:sportTopicMarkerWpf="clr-namespace:SportTopicMarkerWPF"
+        mc:Ignorable="d"
+        Title="Sport topic marker" Height="350" Width="600" d:DataContext="{d:DesignInstance Type=sportTopicMarkerWpf:MainViewModel }">
+    <Grid>
+        <TabControl>
+            <TabItem Header="Data Set">
+                <ListView ItemsSource="{Binding DataSet}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="450"/>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="50"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0" IsEnabled="False" Text="{Binding ArticleStub, Mode=OneWay}"/>
+                                <TextBox Grid.Column="1" IsEnabled="False" Text="{Binding Category, Mode=OneWay}"/>
+                                <CheckBox Grid.Column="2" IsEnabled="False" IsChecked="{Binding IsProcessed, Mode=OneWay}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </TabItem>
+            <TabItem Header="Training">
+              <Grid>
+                  <Grid.RowDefinitions>
+                      <RowDefinition Height="Auto"></RowDefinition>
+                      <RowDefinition Height="Auto"></RowDefinition>
+                      <RowDefinition Height="Auto"></RowDefinition>
+                  </Grid.RowDefinitions>
+                  <Button Grid.Row="0" Command="{Binding Train}" Content="Train with new data"/>
+                  <Button Grid.Row="1" Command="{Binding ResetTrainedStatus}" Content="Reset training status"/>
+                  <TextBox Grid.Row="2" Text="{Binding TrainingStatus, Mode=OneWay}" IsEnabled="False"/>
+              </Grid>
+            </TabItem>
+            <TabItem Header="Testing">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Label Grid.Row="0" Content="Article: "/>
+                    <TextBox Grid.Row="1" Text="{Binding TestingArticle, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True"/>
+                    <Button Grid.Row="2" Content="Mark with topic" Command="{Binding Test}"/>
+                    <Label Grid.Row="3" Content="Marked topic:"/>
+                    <Label Grid.Row="4" Content="{Binding MarkedTopic}"/>
+                    <Label Grid.Row="5" Content="Real topic:" />
+                    <ComboBox Grid.Row="6" ItemsSource="{Binding Topics}" SelectedItem="{Binding SelectedRealTopic}" Width="Auto"/>
+                    <Button Grid.Row="7" Content="Add article to database" Command="{Binding EnhanceDatabase}"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using SportTopicMarker;
 
 namespace SportTopicMarkerConsole
@@ -22,7 +23,7 @@ namespace SportTopicMarkerConsole
             NLPProcessor processor = new NLPProcessor();
             Marker marker = new Marker(processor, @"C:\Users\jantk_000\Documents\GitHub\sport-topic-marker\Model\");
             var articleCount = database.Articles.Count;
-
+            
             if ("teach".Equals(action))
             {
                 for (int i = 0; i < articleCount; i++)
@@ -32,16 +33,20 @@ namespace SportTopicMarkerConsole
                     marker.ExtendDatabaseWithArticle(article);
                 }
 
-                for (int i = 0; i < articleCount; i++)
+                for (int j = 0; j < 1; j++)
                 {
-                    Console.WriteLine("Teaching network with article {0}/{1}", i + 1, articleCount);
-                    marker.TrainClassifierWithArticle(database.Articles[i]);
-                }
+                    for (int i = 0; i < articleCount; i++)
+                    {
+                        Console.WriteLine("Teaching network with article {0}/{1}", i + 1, articleCount);
+                        marker.TrainClassifierWithArticle(database.Articles[i]);
+                    }
 
-                for (int i = 0; i < articleCount; i++)
-                {
-                    LabeledArticle labeled = marker.LabelArticle(database.Articles[i].Article);
-                    Console.WriteLine("Article marked as: {0} should be: {1}", labeled.Category, database.Articles[i].Category);
+                    for (int i = 0; i < articleCount; i++)
+                    {
+                        LabeledArticle labeled = marker.LabelArticle(database.Articles[i].Article);
+                        Console.WriteLine("Article marked as: {0} should be: {1}", labeled.Category,
+                            database.Articles[i].Category);
+                    }
                 }
 
                 marker.Save();

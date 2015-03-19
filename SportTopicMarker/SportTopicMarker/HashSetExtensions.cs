@@ -18,6 +18,11 @@ namespace SportTopicMarker
 
         public static void Load(this HashSet<string> data, string path)
         {
+            if (!File.Exists(path))
+            {
+                StreamWriter writer = File.CreateText(path);
+                writer.Close();
+            }
             string[] lines = File.ReadAllLines(path);
             foreach (string line in lines)
             {

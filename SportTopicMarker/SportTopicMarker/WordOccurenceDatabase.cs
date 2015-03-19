@@ -73,29 +73,32 @@ namespace SportTopicMarker
 
         public void Load(string path)
         {
-            var lines = File.ReadAllLines(path);
-            string[] header = lines[0].Split(',');
-            Dictionary<int, SportCategory> categoryIndex = new Dictionary<int, SportCategory>();
-            for (int i = 0; i < header.Length; i++)
+            if (File.Exists(path))
             {
-                string cat = header[i];
-                SportCategory category;
-                if (Enum.TryParse(cat, out category))
+                var lines = File.ReadAllLines(path);
+                string[] header = lines[0].Split(',');
+                Dictionary<int, SportCategory> categoryIndex = new Dictionary<int, SportCategory>();
+                for (int i = 0; i < header.Length; i++)
                 {
-                    categoryIndex.Add(i, category);
+                    string cat = header[i];
+                    SportCategory category;
+                    if (Enum.TryParse(cat, out category))
+                    {
+                        categoryIndex.Add(i, category);
+                    }
                 }
-            }
 
-            for (int i = 1; i < lines.Length; i++)
-            {
-                string wordLine = lines[i];
-                string[] data = wordLine.Split(',');
-                string word = data[0];
-                _wordOccurenceDatabase.Add(word, new Dictionary<SportCategory, int>());
-                Dictionary<SportCategory, int> dict = _wordOccurenceDatabase[word];
-                for (int j = 1; j < data.Length; j++)
+                for (int i = 1; i < lines.Length; i++)
                 {
-                    dict.Add(categoryIndex[j], int.Parse(data[j]));
+                    string wordLine = lines[i];
+                    string[] data = wordLine.Split(',');
+                    string word = data[0];
+                    _wordOccurenceDatabase.Add(word, new Dictionary<SportCategory, int>());
+                    Dictionary<SportCategory, int> dict = _wordOccurenceDatabase[word];
+                    for (int j = 1; j < data.Length; j++)
+                    {
+                        dict.Add(categoryIndex[j], int.Parse(data[j]));
+                    }
                 }
             }
         }

@@ -1,20 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Xml.Serialization;
 
 namespace SportTopicMarker
 {
     public class LabeledArticleDatabase
     {
-        private readonly List<LabeledArticle> _articles;
+        private readonly ObservableCollection<LabeledArticle> _articles;
 
         public LabeledArticleDatabase(List<LabeledArticle> articles)
         {
-            _articles = articles;
+            _articles = new ObservableCollection<LabeledArticle>(articles);
         }
 
         public List<LabeledArticle> Articles
+        {
+            get { return _articles.ToList(); }
+        }
+
+        public ObservableCollection<LabeledArticle> ArticlesObservable
         {
             get { return _articles; }
         }
@@ -34,7 +41,7 @@ namespace SportTopicMarker
             {
                 dataset = (List<LabeledArticle>)serializer.Deserialize(stream);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 dataset = new List<LabeledArticle>();
                 Console.WriteLine("Cannot deserialize dataset - creating new");
@@ -47,7 +54,10 @@ namespace SportTopicMarker
         public void Save(string path)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(List<LabeledArticle>));
-            serializer.Serialize(File.OpenWrite(path), _articles);
+            File.Delete(path);
+            FileStream fileStream = File.OpenWrite(path);
+            serializer.Serialize(fileStream, Articles);
+            fileStream.Close();
         }
     }
 }

@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SportTopicDatasetMaker", "S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SportTopicMarker", "SportTopicMarker\SportTopicMarker.csproj", "{CFB3AFF9-12E6-4C1D-AC06-76C08D6F17E0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SportTopicMarkerWPF", "SportTopicMarkerWPF\SportTopicMarkerWPF.csproj", "{DCBE8FC5-C5B0-4909-9EE7-561FF074B897}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{CFB3AFF9-12E6-4C1D-AC06-76C08D6F17E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CFB3AFF9-12E6-4C1D-AC06-76C08D6F17E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CFB3AFF9-12E6-4C1D-AC06-76C08D6F17E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCBE8FC5-C5B0-4909-9EE7-561FF074B897}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCBE8FC5-C5B0-4909-9EE7-561FF074B897}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCBE8FC5-C5B0-4909-9EE7-561FF074B897}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCBE8FC5-C5B0-4909-9EE7-561FF074B897}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

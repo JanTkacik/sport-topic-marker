@@ -26,6 +26,17 @@ namespace SportTopicMarker
             return GetNEREntity(annotation, "PERSON");
         }
 
+        public static HashSet<string> GetLemmas(Annotation annotation)
+        {
+            HashSet<string> returnSet = new HashSet<string>();
+            ArrayList tokenAnnotations = (ArrayList)annotation.get(TokenAnnotationClass);
+            foreach (CoreLabel tokenAnnotation in tokenAnnotations)
+            {
+                returnSet.Add(tokenAnnotation.lemma().ToLowerInvariant());
+            }
+            return returnSet;
+        }
+
         private static HashSet<string> GetNEREntity(Annotation annotation, string tagName)
         {
             HashSet<string> returnSet = new HashSet<string>();
